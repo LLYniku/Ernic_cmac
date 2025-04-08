@@ -12,15 +12,12 @@ module cmac_usplus_0_exdes
     output wire     tx_gt_locked_led,
     output wire     tx_done_led,
     output wire     tx_busy_led,
-    output wire     hbm_cattrip,
+
+    input  wire     sys_reset,
+
     input  wire     gt_ref_clk_p,
     input  wire     gt_ref_clk_n,
-
-
-    // input  wire     sys_reset,
-    // input  wire     init_clk
-    input  wire     init_clk_p,         //100GHz
-    input  wire     init_clk_n
+    input  wire     init_clk
 );
 
   parameter PKT_NUM      = 1000;    //// 1 to 65535 (Number of packets)
@@ -110,9 +107,6 @@ module cmac_usplus_0_exdes
   wire            ctl_tx_send_rfi;
   wire            ctl_tx_send_lfi;
   wire            tx_reset;
-  wire     sys_reset;
-  wire     init_clk_ibufg;
-  wire     init_clk;
 
   assign gtwiz_reset_tx_datapath    = 1'b0;
   assign gtwiz_reset_rx_datapath    = 1'b0;
@@ -122,8 +116,6 @@ module cmac_usplus_0_exdes
   wire     simplex_mode_rx_aligned;
 
   assign simplex_mode_rx_aligned    = 1'b1;
-  assign sys_reset = 0;
-
 
   wire     [511:0]  ernic_m_axis_tdata ;
   wire     [63:0]   ernic_m_axis_tkeep ;
@@ -132,20 +124,6 @@ module cmac_usplus_0_exdes
   wire     [511:0]  ernic_m_axis_send_tdata ;
   wire     send_continuous_pkts;
   wire     lbus_tx_rx_restart_in;
-
-
-
-IBUFGDS clk_init_ibufg_inst (
-   .O   (init_clk_ibufg),
-   .I   (init_clk_p),
-   .IB  (init_clk_n)
-);
-
-BUFG
-clk_100mhz_1_bufg_inst (
-    .I(init_clk_ibufg),
-    .O(init_clk)
-);
 
 
 cmac_usplus_0 DUT
@@ -308,21 +286,6 @@ exdes_top ernic_top_inst (
 
 //exdes_top（数据源） → cmac_usplus_0_axis_pkt_gen（发送器） → CMAC IP（发包）
 
-ila_0 mark (
-	.clk(txusrclk2), // input wire clk
-
-
-	.probe0(init_clk), // input wire [0:0]  probe0  
-	.probe1(tx_axis_tdata), // input wire [511:0]  probe1 
-	.probe2(tx_prestate), // input wire [3:0]  probe2 
-	.probe3(tx_axis_tready), // input wire [0:0]  probe3 
-	.probe4(tx_axis_tlast), // input wire [0:0]  probe4
-	.probe5(ctl_tx_enable), // input wire [0:0]  probe5 
-	.probe6(gt_ref_clk_out), // input wire [0:0]  probe6 
-	.probe7(tx_gt_locked_led), // input wire [0:0]  probe7 
-	.probe8(sys_reset), // input wire [0:0]  probe8 
-	.probe9(usr_tx_reset) // input wire [0:0]  probe9
-);
 
 endmodule
 

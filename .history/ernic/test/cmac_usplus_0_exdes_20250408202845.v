@@ -12,15 +12,12 @@ module cmac_usplus_0_exdes
     output wire     tx_gt_locked_led,
     output wire     tx_done_led,
     output wire     tx_busy_led,
-    output wire     hbm_cattrip,
+
+    input  wire     sys_reset,
+
     input  wire     gt_ref_clk_p,
     input  wire     gt_ref_clk_n,
-
-
-    // input  wire     sys_reset,
-    // input  wire     init_clk
-    input  wire     init_clk_p,         //100GHz
-    input  wire     init_clk_n
+    input  wire     init_clk
 );
 
   parameter PKT_NUM      = 1000;    //// 1 to 65535 (Number of packets)
@@ -110,9 +107,6 @@ module cmac_usplus_0_exdes
   wire            ctl_tx_send_rfi;
   wire            ctl_tx_send_lfi;
   wire            tx_reset;
-  wire     sys_reset;
-  wire     init_clk_ibufg;
-  wire     init_clk;
 
   assign gtwiz_reset_tx_datapath    = 1'b0;
   assign gtwiz_reset_rx_datapath    = 1'b0;
@@ -122,8 +116,6 @@ module cmac_usplus_0_exdes
   wire     simplex_mode_rx_aligned;
 
   assign simplex_mode_rx_aligned    = 1'b1;
-  assign sys_reset = 0;
-
 
   wire     [511:0]  ernic_m_axis_tdata ;
   wire     [63:0]   ernic_m_axis_tkeep ;
@@ -132,20 +124,6 @@ module cmac_usplus_0_exdes
   wire     [511:0]  ernic_m_axis_send_tdata ;
   wire     send_continuous_pkts;
   wire     lbus_tx_rx_restart_in;
-
-
-
-IBUFGDS clk_init_ibufg_inst (
-   .O   (init_clk_ibufg),
-   .I   (init_clk_p),
-   .IB  (init_clk_n)
-);
-
-BUFG
-clk_100mhz_1_bufg_inst (
-    .I(init_clk_ibufg),
-    .O(init_clk)
-);
 
 
 cmac_usplus_0 DUT

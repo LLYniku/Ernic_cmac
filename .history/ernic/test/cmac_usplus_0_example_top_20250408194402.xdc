@@ -70,7 +70,7 @@ set_output_delay 0 [get_ports {hbm_cattrip}]
 # GT clock need getports 161MHz
 set_property -dict {LOC N36} [get_ports gt_ref_clk_p]         ;# Bank 131 - MGTREFCLK0N_131 
 set_property -dict {LOC N37} [get_ports gt_ref_clk_n]         ;# Bank 131 - MGTREFCLK0P_131
-create_clock -period 6.206  -name gt_ref_clk      [get_ports gt_ref_clk_p]
+#create_clock -period 6.206  -name gt_ref_clk      [get_ports gt_ref_clk_p]
 
 # init clock 100MHz
 # set_property PACKAGE_PIN BC18     [get_ports "SYSCLK3_N"]            ;# Bank  64 VCCO - VCC1V8   - IO_L11N_T1U_N9_GC_64
