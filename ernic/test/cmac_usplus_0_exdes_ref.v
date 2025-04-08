@@ -6,25 +6,30 @@ module cmac_usplus_0_exdes
     output [3 :0]   gt_txp_out,
     output [3 :0]   gt_txn_out,
 
-    input  wire     send_continuous_pkts,
-    input  wire     lbus_tx_rx_restart_in,
-    // input  wire     simplex_mode_rx_aligned,
     output wire     tx_gt_locked_led,
     output wire     tx_done_led,
     output wire     tx_busy_led,
+    output wire     hbm_cattrip,
 
-    input  wire     sys_reset,
 
-    input  wire     gt_ref_clk_p,
+    input  wire     gt_ref_clk_p,     //161.125MHz
     input  wire     gt_ref_clk_n,
-    input  wire     init_clk
+    input  wire     init_clk_p,         //100GHz
+    input  wire     init_clk_n
+    //simulation code
+    // input  wire     simplex_mode_rx_aligned,
+    // input  wire     tx_axis_tready,
+    // input  wire     send_continuous_pkts,
+    // input  wire     lbus_tx_rx_restart_in,
+    // input  wire     sys_reset,
+
 );
 
   parameter PKT_NUM      = 1000;    //// 1 to 65535 (Number of packets)
-  parameter PKT_SIZE     = 522;     //// Min pkt size 64 Bytes; Max pkt size 16000 Bytes
+  parameter PKT_SIZE     = 8192;     //// Min pkt size 64 Bytes; Max pkt size 16000 Bytes
                                     //// Above Min value is >= GUI configured Min pkt value
                                     //// and Max value is <= GUI configured Max pkt value
-  
+
   wire [11 :0]    gt_loopback_in;
 
   //// For other GT loopback options please change the value appropriately
@@ -39,12 +44,15 @@ module cmac_usplus_0_exdes
   wire            gtwiz_reset_tx_datapath;
   wire            gtwiz_reset_rx_datapath;
   wire            txusrclk2;
-  wire            tx_axis_tready;
+//   wire            tx_axis_tready;
   wire            tx_axis_tvalid;
   wire [511:0]    tx_axis_tdata;
   wire            tx_axis_tlast;
   wire [63:0]     tx_axis_tkeep;
   wire            tx_axis_tuser;
+
+  wire [3:0]      tx_prestate;
+
   wire            tx_rdyout;
   wire [128-1:0]  tx_datain0;
   wire            tx_enain0;
@@ -108,21 +116,58 @@ module cmac_usplus_0_exdes
   wire            ctl_tx_send_lfi;
   wire            tx_reset;
 
+  //run code start
+
+  wire     send_continuous_pkts;
+  wire     tx_axis_tready;
+  wire     simplex_mode_rx_aligned;
+  wire     lbus_tx_rx_restart_in;
+  wire     sys_reset;
+  wire     init_clk_ibufg;
+  wire     init_clk;
+
+
+
+
+  //run code end
+
+  assign sys_reset = 0;
+  assign hbm_cattrip = 0;
   assign gtwiz_reset_tx_datapath    = 1'b0;
   assign gtwiz_reset_rx_datapath    = 1'b0;
-
-  wire aclk       = txusrclk2;
-  wire aresetn    = ~usr_tx_reset;
-  wire     simplex_mode_rx_aligned;
-
   assign simplex_mode_rx_aligned    = 1'b1;
+  // assign usr_tx_reset    = 1'b0;
+  // assign ctl_tx_enable   = 1'b1;
 
-  wire     [511:0]  ernic_m_axis_tdata ;
-  wire     [63:0]   ernic_m_axis_tkeep ;
-  wire              ernic_m_axis_tvalid;
-  wire              ernic_m_axis_tlast ;
-  wire     [511:0]  ernic_m_axis_send_tdata ;
 
+
+
+// IBUFDS #(
+//     .DIFF_TERM("TRUE"),     // Enable differential termination resistor
+//     .IOSTANDARD("LVDS")     // I/O standard for the clock is LVDS
+// ) init_clk_ibufds_inst (
+//     .I(init_clk_p),         // Positive input for differential clock
+//     .IB(init_clk_n),        // Negative input for differential clock
+//     .O(init_clk_ibufg)      // Single-ended output clock
+// );
+
+// BUFG init_clk_bufg_inst (
+//     .I(init_clk_ibufg),     // Input from IBUFDS
+//     .O(init_clk)            // Output to be used in design
+// );
+
+
+IBUFGDS clk_init_ibufg_inst (
+   .O   (init_clk_ibufg),
+   .I   (init_clk_p),
+   .IB  (init_clk_n)
+);
+
+BUFG
+clk_100mhz_1_bufg_inst (
+    .I(init_clk_ibufg),
+    .O(init_clk)
+);
 
 cmac_usplus_0 DUT
 (
@@ -175,7 +220,7 @@ cmac_usplus_0 DUT
     .core_tx_reset                        (1'b0),
     .tx_axis_tready                       (tx_axis_tready),
     .tx_axis_tvalid                       (tx_axis_tvalid),
-    .tx_axis_tdata                        (tx_axis_tdata),   //
+    .tx_axis_tdata                        (tx_axis_tdata),
     .tx_axis_tkeep                        (tx_axis_tkeep),
     .tx_axis_tlast                        (tx_axis_tlast),
     .tx_axis_tuser                        (tx_axis_tuser),
@@ -202,7 +247,8 @@ cmac_usplus_0_axis_pkt_gen
     .clk                                  (txusrclk2),
     .reset                                (usr_tx_reset),
     .sys_reset                            (sys_reset),
-    .send_continuous_pkts                 (1),
+    //run continuous no end information
+    .send_continuous_pkts                 (1), 
     .lbus_tx_rx_restart_in                (1),
     .ctl_tx_enable                        (ctl_tx_enable),
     .ctl_tx_test_pattern                  (ctl_tx_test_pattern),
@@ -247,43 +293,32 @@ cmac_usplus_0_axis_pkt_gen
     .tx_axis_tkeep                        (tx_axis_tkeep),
     .tx_axis_tlast                        (tx_axis_tlast),
     .tx_axis_tuser                        (tx_axis_tuser),
+
+    .tx_prestate                          (tx_prestate),
     .tx_ovfout                            (tx_ovfout),
-    .tx_unfout                            (tx_unfout),
-
-
-    .cmac_m_axis_tdata        (ernic_m_axis_send_tdata)  ,//send模式
-    .cmac_m_axis_tkeep         (ernic_m_axis_tkeep) ,
-    .cmac_m_axis_tvalid         (ernic_m_axis_tvalid),
-    .cmac_m_axis_tlast         (ernic_m_axis_tlast) 
+    .tx_unfout                            (tx_unfout)
 );
 
 
-exdes_top ernic_top_inst (
-    .aclk                   (aclk),
-    .aresetn_1              (aresetn),
-    .cmac_rx_clk            (txusrclk2),
-    .cmac_tx_clk            (txusrclk2),
-    .cmac_rst               (usr_tx_reset),
-    .num_send_pkt_rcvd      (), // 可根据需要连接监控信号
-    .num_rd_resp_pkt_rcvd   (),
-    .num_rdma_rd_wr_wqe     (),
-    .num_ack_rcvd           (),
-    .rdma_write_payload_chk_pass_cnt(), 
-    .send_capsule_matched   (),
-    .rd_rsp_payload_matched (),
-    .final_reg_read_done    (),
-    .rqci_completions_written_out(),
-    // 内部exdes_top模块会产生输出流信号（例如通过FIFO输出的wqe_proc_top_m_axis_tdata等）
-    .cmac_m_axis_tdata        (ernic_m_axis_tdata)  ,
-    .cmac_m_axis_tkeep         (ernic_m_axis_tkeep) ,
-    .cmac_m_axis_tvalid         (ernic_m_axis_tvalid),
-    .cmac_m_axis_tlast         (ernic_m_axis_tlast) ,
-    .tx_m_axis_tdata_int       (ernic_m_axis_send_tdata)
-    // .simplex_mode_rx_aligned
-  );
+ila_0 mark (
+	.clk(txusrclk2), // input wire clk
 
-//exdes_top（数据源） → cmac_usplus_0_axis_pkt_gen（发送器） → CMAC IP（发包）
+
+	.probe0(init_clk), // input wire [0:0]  probe0  
+	.probe1(tx_axis_tdata), // input wire [511:0]  probe1 
+	.probe2(tx_prestate), // input wire [3:0]  probe2 
+	.probe3(tx_axis_tready), // input wire [0:0]  probe3 
+	.probe4(tx_axis_tlast), // input wire [0:0]  probe4
+	.probe5(ctl_tx_enable), // input wire [0:0]  probe5 
+	.probe6(gt_ref_clk_out), // input wire [0:0]  probe6 
+	.probe7(tx_gt_locked_led), // input wire [0:0]  probe7 
+	.probe8(sys_reset), // input wire [0:0]  probe8 
+	.probe9(usr_tx_reset) // input wire [0:0]  probe9
+);
+
+
 
 
 endmodule
+
 

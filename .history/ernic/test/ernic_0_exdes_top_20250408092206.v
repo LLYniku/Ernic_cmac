@@ -20,8 +20,7 @@ output wire rqci_completions_written_out,
 output [511:0] cmac_m_axis_tdata,
 output [63:0]  cmac_m_axis_tkeep,
 output         cmac_m_axis_tvalid,
-output         cmac_m_axis_tlast,
-output [511:0] tx_m_axis_tdata_int
+output         cmac_m_axis_tlast
 
 );
 
@@ -63,7 +62,7 @@ localparam C_M_AXI_ID_WIDTH =1;
  wire  [32-1:0]            i_data;
  wire                                    o_txns_done;
  wire                                    conf_of_reg_done;
- wire [C_AXIS_DATA_WIDTH-1 : 0]          tx_m_axis_tdata_int;   //need
+ wire [C_AXIS_DATA_WIDTH-1 : 0]          tx_m_axis_tdata_int;
  wire [C_AXIS_DATA_WIDTH/8-1:0]          tx_m_axis_tkeep_int;
  wire                                    tx_m_axis_tvalid_int;
  wire                                    tx_m_axis_tready_int;

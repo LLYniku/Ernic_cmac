@@ -20,8 +20,7 @@ output wire rqci_completions_written_out,
 output [511:0] cmac_m_axis_tdata,
 output [63:0]  cmac_m_axis_tkeep,
 output         cmac_m_axis_tvalid,
-output         cmac_m_axis_tlast,
-output [511:0] tx_m_axis_tdata_int
+output         cmac_m_axis_tlast
 
 );
 

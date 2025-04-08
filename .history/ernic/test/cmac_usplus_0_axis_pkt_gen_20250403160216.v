@@ -8,7 +8,7 @@ module cmac_usplus_0_axis_pkt_gen
    )
    (
     input  wire            clk,
-    input  wire            reset,           //user_tx_reset
+    input  wire            reset,
     input  wire            sys_reset,
 
     input  wire            send_continuous_pkts,
@@ -379,7 +379,7 @@ module cmac_usplus_0_axis_pkt_gen
                                          begin
                                              first_pkt      <= 1'b0;
                                              pkt_size_64    <= 1'd1;
-					                         number_pkt_tx <= 16'd1;
+					     number_pkt_tx <= 16'd1;
                                              if (PKT_NUM == 16'd1)
                                                 tx_done_tmp <= 1'b1;
                                          end

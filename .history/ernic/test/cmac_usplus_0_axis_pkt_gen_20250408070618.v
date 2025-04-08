@@ -8,7 +8,7 @@ module cmac_usplus_0_axis_pkt_gen
    )
    (
     input  wire            clk,
-    input  wire            reset,           //user_tx_reset
+    input  wire            reset,
     input  wire            sys_reset,
 
     input  wire            send_continuous_pkts,
