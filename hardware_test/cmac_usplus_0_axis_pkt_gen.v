@@ -61,13 +61,14 @@ module cmac_usplus_0_axis_pkt_gen
     input  wire            tx_ovfout,
     input  wire            tx_unfout,
 
-    input   reg    [511:0]  cmac_m_axis_tdata  ,
-    input   reg    [63:0]   cmac_m_axis_tkeep  ,
-    input   reg             cmac_m_axis_tvalid ,
-    input   reg             cmac_m_axis_tlast  
+    input   wire    [511:0]  cmac_m_axis_tdata  ,
+    input   wire    [63:0]   cmac_m_axis_tkeep  ,
+    input   wire             cmac_m_axis_tvalid ,
+    input   wire             cmac_m_axis_tlast  ,
     output reg  [3:0]      tx_prestate
     // output reg  [7:0]      byte_1024_count,
     // output reg  [63:0]    count_test
+
     );
 
     //// Parameters Decleration
